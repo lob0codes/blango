@@ -8,26 +8,24 @@ def index(req):
   print(len(posts))
   return render(req, 'blog/index.html', {'posts': posts})
 
-def post_detail(req, slug):
+def post_detail(request, slug):
   post = get_object_or_404(Post, slug=slug)
 
-  if req.user.is_active:
-    if req.method == 'POST':
-      comment_form = CommentForm(req.POST)
+  # To activate the user, login into the admin endpoint.
+  if request.user.is_active:
+    if request.method == 'POST':
+      comment_form = CommentForm(request.POST)
 
       if comment_form.is_valid():
         comment = comment_form.save(commit=False)
         comment.content_object = post
-        comment.creator = req.user
+        comment.creator = request.user
         comment.save()
-        print(comment_form)
-        return redirect(req.path_info)
+        return redirect(request.path_info)
       
     else:
-      print('NANNIIIII')
       comment_form = CommentForm()
 
   else:
     comment_form = None
-  print(comment_form)
-  return render(req, 'blog/post-detail.html', {'post': post, 'comment_form': comment_form})
+  return render(request, 'blog/post-detail.html', {'post': post, 'comment_form': comment_form})
